@@ -47,5 +47,8 @@ def summarise(df: pd.DataFrame, labels: np.ndarray) -> pd.DataFrame:
         lat, lon = pts.lat.mean(), pts.lon.mean()
         d = haversine_km(lat, lon, pts.lat.to_numpy(), pts.lon.to_numpy())
         rows.append({"hotspot": c, "tickets": len(pts), "lat": round(lat, 4), "lon": round(lon, 4),
-                     "p90_radius_km": round(float(np.quantile(d, 0.9)), 2)})
+                     "p90_radius_km": round(float(np.quantile(d, 0.9)), 2),
+                     # a round radius hides elongated hotspots (a cable along a road), so report the span too
+                     "span_km": round(float(haversine_km(pts.lat.min(), pts.lon.min(),
+                                                         pts.lat.max(), pts.lon.max())), 2)})
     return pd.DataFrame(rows).sort_values("tickets", ascending=False).reset_index(drop=True)
